@@ -26,6 +26,7 @@ for move in legal_moves:
     print(move.uci())
 
 playing = True
+
 def Load_Pieces():
     pieces = {}
     pieces['P'] =pygame.image.load('Images/WP.png')
@@ -80,7 +81,7 @@ def Draw_Status(board):
             text += " Check!"
 
     label = myfont.render(text, 1, (255, 255, 0))
-    surface.blit(label, label.get_rect(center=(width / 2, 520)))
+    surface.blit(label, label.get_rect(center=(width / 2, 510)))
 def Draw_Current_Selection(begin_square):
     if begin_square != '00':
         x = chess.square_file(chess.parse_square(begin_square)) * boxSize
@@ -156,6 +157,7 @@ while playing:
         else:
             if event.type == pygame.MOUSEBUTTONDOWN:
                 board.reset()
+                turn = 1
         if board.is_checkmate() or board.is_stalemate():
             turn = 3
 
