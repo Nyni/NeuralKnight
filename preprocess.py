@@ -13,10 +13,11 @@ def filter_elo(pgn, elo, max_match = 5000):
     elos_offset = []
     match_num = 0
     while True:
-        if match_num > max_match:
+        headers = chess.pgn.read_headers(pgn)
+
+        if match_num > max_match or headers == None:
             break
 
-        headers = chess.pgn.read_headers(pgn)
         if int(headers.get("WhiteElo", 0)) > elo and int(headers.get("BlackElo", 0)) > elo:
             match_num += 1
             elos_offset.append(pgn.tell())
