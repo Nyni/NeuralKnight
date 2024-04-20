@@ -4,7 +4,10 @@ from torch.utils.data import DataLoader
 from torch import nn
 import torch
 
-games = preprocess.parse_pgn('libchess_db.pgn', 2000, 100)
+MIN_ELO = 2000
+MAX_TRAINING_GAMES = 5000
+
+games = preprocess.parse_pgn('libchess_db.pgn', MIN_ELO, MAX_TRAINING_GAMES)
 data_train = preprocess.ChessDataset(games)
 data_loader = DataLoader(data_train, batch_size=32, drop_last=True)
 
@@ -16,10 +19,9 @@ def train_one_epoch():
     running_loss = 0
     last_loss = 0
     
-    print("Max data batches:", len(data_loader))
+    max_batches = len(data_loader)
     for i, data in enumerate(data_loader):
         input, output = data
-        print("Training data: ", i)
 
         optimizer.zero_grad()
 
@@ -31,11 +33,19 @@ def train_one_epoch():
         optimizer.step()
 
         running_loss += loss.item()
-        print("lost:" , loss.item())
-        if i % 1000 == 999:
-            last_loss = running_loss / 1000 # loss per batch
+        print("loss:" , loss.item())
+        if i % max_batches == max_batches - 1:
+            last_loss = running_loss / max_batches # loss per batch
 
     return last_loss
 
-print("loss:", train_one_epoch())
-# print("Max data:", len(data_loader))
+def train_epoch(num = 1):
+    model.train()
+
+    for i in range(num):
+        print("Epoch:", i + 1)
+        print("loss per epoch:", train_one_epoch())
+
+    torch.save(model.state_dict(), "chess_model.pt")
+
+train_epoch()
