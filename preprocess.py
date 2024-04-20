@@ -13,14 +13,15 @@ def filter_elo(pgn, elo, max_match = 5000):
     elos_offset = []
     match_num = 0
     while True:
+        offset = pgn.tell()
         headers = chess.pgn.read_headers(pgn)
 
-        if match_num > max_match or headers == None:
+        if match_num > max_match or headers is None:
             break
 
-        if int(headers.get("WhiteElo", 0)) > elo and int(headers.get("BlackElo", 0)) > elo:
+        if (int(headers.get("WhiteElo", 0)) > elo) and (int(headers.get("BlackElo", 0)) > elo) and (headers.get("Termination", "?") == "Normal"):
             match_num += 1
-            elos_offset.append(pgn.tell())
+            elos_offset.append(offset)
 
     return elos_offset
 
@@ -37,12 +38,12 @@ def parse_pgn(file, min_elo = 2000, matches = 5000) -> list[chess.pgn.Game]:
 
 def move_2_np_repr(move: Move):
     move_uci = move.uci()
-    from_output_layer = np.zeros((8, 8))
+    from_output_layer = np.zeros((8, 8), dtype=np.float32)
     from_row = 8 - int(move_uci[1])
     from_col = letter_2_num[move_uci[0]]
     from_output_layer[from_row, from_col] = 1
 
-    to_output_layer = np.zeros((8, 8))
+    to_output_layer = np.zeros((8, 8), dtype=np.float32)
     to_row = 8 - int(move_uci[3])
     to_col = letter_2_num[move_uci[2]]
     to_output_layer[to_row, to_col] = 1
@@ -54,7 +55,7 @@ def board_2_np_repr(board: Board):
     layers = []
     for p in peices:
         layers.append(create_board_layer(board, p))
-    return np.stack(layers)
+    return np.stack(layers, dtype=np.float32)
 
 def create_board_layer(board, peice):
     b = [[]]
