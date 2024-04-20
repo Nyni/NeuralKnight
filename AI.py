@@ -1,3 +1,5 @@
+# The AI were built while following the tutorial "How to Build a 2000 ELO Chess AI with Deep Learning" by Moran Reznik at https://www.youtube.com/watch?v=aOwvRvTPQrs
+
 from chess import Board, BLACK
 import torch
 from torch import nn
