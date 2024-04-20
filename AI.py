@@ -72,14 +72,13 @@ def distribute_moves(vals):
     probs = probs / probs.sum()
     return probs
 
-def make_move(ai: ChessCNN, board: Board, color):
+def make_move(ai: ChessCNN, board: Board):
     np_board = torch.from_numpy(board_2_np_repr(board))
-    if color == BLACK:
+    if board.turn == BLACK:
         np_board *= -1
     np_board = np_board.unsqueeze(0)
 
     move = ai(np_board)[0]
-    print(move)
     legal_moves = [i for i in board.legal_moves]
     vals = []
     froms = [str(legal_move)[:2] for legal_move in legal_moves]
