@@ -1,9 +1,9 @@
-from chess import Board, Move
+from chess import Board, BLACK
 import torch
 from torch import nn
 import torch.nn.functional as F
 import numpy as np
-from preprocess import board_2_np_repr, num_2_letter
+from preprocess import board_2_np_repr, num_2_letter, letter_2_num
 
 import random
 def make_move_random(board):
@@ -62,13 +62,43 @@ def np_move_2_uci(move):
 
     return "".join([from_col, str(from_row), to_col, str(to_row)])
 
-def make_move(ai: ChessCNN, board: Board):
-    legal = False
-    uci = ""
-    while not legal:
-        np_board = board_2_np_repr(board)
-        prediction = ai(np_board)
-        uci = np_move_2_uci(prediction)
-        legal = board.is_legal(Move.from_uci(uci))
-    
-    return uci
+def distribute_moves(vals):
+    probs = np.array(vals, dtype=np.float64)
+    probs = np.exp(probs)
+    probs = probs / probs.sum()
+    probs = probs ** 3
+    probs = probs / probs.sum()
+    return probs
+
+def make_move(ai: ChessCNN, board: Board, color):
+    np_board = torch.from_numpy(board_2_np_repr(board))
+    if color == BLACK:
+        np_board *= -1
+    np_board = np_board.unsqueeze(0)
+
+    move = ai(np_board)[0]
+    print(move)
+    legal_moves = [i for i in board.legal_moves]
+    vals = []
+    froms = [str(legal_move)[:2] for legal_move in legal_moves]
+    froms = list(set(froms))
+    for fro in froms:
+        val = move[0,:,:][8 - int(fro[1]), letter_2_num[fro[0]]]
+        vals.append(val)
+
+    probs = distribute_moves(vals)
+    choosen = str(np.random.choice(froms, size=1, p=probs)[0])[:2]
+
+    vals = []
+    for legal_move in legal_moves:
+        fro = str(legal_move)[:2]
+        if fro == choosen:
+            to = str(legal_move)[2:]
+            val = move[1,:,:][8 - int(to[1]), letter_2_num[to[0]]]
+            vals.append(val)
+        else:
+            vals.append(0)
+
+    choosen = legal_moves[np.argmax(vals)]
+
+    return choosen
