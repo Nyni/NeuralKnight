@@ -1,6 +1,4 @@
-import preprocess
 import torch
-from torch.utils.data import DataLoader
 from torch import nn
 import torch.nn.functional as F
 
@@ -8,10 +6,6 @@ import random
 def make_move(board):
     valid_moves =[ move.uci() for move in list(board.legal_moves)]
     return random.choice(valid_moves)
-
-games = preprocess.parse_pgn('libchess_db.pgn', 2000, 5000)
-data_train = preprocess.ChessDataset(games)
-data_loader = DataLoader(data_train, batch_size=32, drop_last=True)
 
 class ChessModule(nn.Module):
     def __init__(self, hidden_size) -> None:
