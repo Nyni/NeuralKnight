@@ -5,7 +5,7 @@ import torch
 from torch import nn
 import torch.nn.functional as F
 import numpy as np
-from preprocess import board_2_np_repr, num_2_letter, letter_2_num
+from preprocess import board_2_np_repr, letter_2_num
 
 import random
 def make_move_random(board):
@@ -51,18 +51,6 @@ class ChessCNN(nn.Module):
         input = self.output_layer(input)
 
         return input
-
-def np_move_2_uci(move):
-    move = np.where(move == 1)
-    from_row, from_col = move[1]
-    from_col = num_2_letter[from_col]
-    from_row = 8 - from_row
-
-    to_row, to_col = move[2]
-    to_col = num_2_letter[to_col]
-    to_row = 8 - to_row
-
-    return "".join([from_col, str(from_row), to_col, str(to_row)])
 
 def distribute_moves(vals):
     probs = np.array(vals, dtype=np.float64)
