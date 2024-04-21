@@ -3,9 +3,10 @@ import AI
 from torch.utils.data import DataLoader
 from torch import nn
 import torch
+torch.set_default_device('cuda' if torch.cuda.is_available() else 'cpu')
 
 MIN_ELO = 2000
-MAX_TRAINING_GAMES = 1000
+MAX_TRAINING_GAMES = 5000
 
 def split_data(data, train_percentage):
     from random import shuffle
@@ -56,7 +57,7 @@ def train_one_epoch():
 def train_epoch(num = 1):
     best_vloss = 100_000
     max_batches = len(testing_data_loader)
-    for epoch in range(1, num):
+    for epoch in range(1, num+1):
         print("Epoch:", epoch)
         model.train()
         avg_loss = train_one_epoch()
@@ -76,7 +77,8 @@ def train_epoch(num = 1):
         print(f"Training loss: {avg_loss}; Validation loss: {avg_vloss}")
 
         if best_vloss > avg_vloss:
+            print('writing model to disk')
             best_vloss = avg_vloss
             torch.save(model.state_dict(), f"ChessCNN_E{epoch}_L_{best_vloss:.5E}.pt")
 
-train_epoch()
+train_epoch(5)
