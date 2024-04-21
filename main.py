@@ -1,4 +1,5 @@
 import chess
+import chess.pgn
 import pygame
 
 import AI
@@ -8,9 +9,9 @@ pygame.init()
 width = 480  # Width of the window
 height = 540  # Height of the Window matches the width + an extra row for score
 boxSize = width // 8 # 1/8 of the window widtch.
-
+game = chess.pgn.Game()
 board = chess.Board()
-
+san_moves = []
 print(board)
 surface = pygame.display.set_mode((width, height))
 
@@ -122,6 +123,7 @@ while playing:
         if event.type == pygame.QUIT:
             playing = False
         if turn==1:
+            """
             if event.type == pygame.MOUSEBUTTONDOWN:
                 #check position of the mouse
                 x, y = event.pos
@@ -151,12 +153,63 @@ while playing:
                         move_list=[]
 
 
+
         elif turn == 2:
+
+            #game.add_variation(str(board))
+            #board_pgn = board.epd()
+
             board.push_san(AI.make_move(board))
             turn = 1
+            """
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                # Check position of the mouse
+                x, y = event.pos
+                x = x // boxSize
+                y = y // boxSize
+                # If the mouse is in the scorebox, do nothing
+                if y == 8:
+                    pass
+                else:
+                    if begin == '00':
+                        begin = str(colNames[x] + str(rowNames[y]))
+                        print(begin)
+                        move_list = [move.uci() for move in list(board.legal_moves) if
+                                     move.from_square == chess.parse_square(begin)]
+                        print([move for move in move_list])
+                    else:
+                        dest = str(colNames[x] + str(rowNames[y]))
+                        move_to_make = str(begin + dest)
+                        if move_to_make in [move.uci() for move in list(board.legal_moves)]:
+                            new_move = chess.Move.from_uci(move_to_make)
+                            san_moves.append(board.san(new_move))
+                            board.push_uci(move_to_make)
+                            print(san_moves)
+                            turn = 2
+                        elif move_to_make + "q" in [move.uci() for move in list(board.legal_moves)]:
+                            move_to_make = move_to_make + "q"
+
+                            new_move = chess.Move.from_uci(move_to_make)
+                            san_moves.append(board.san(new_move))
+
+                            board.push_uci(move_to_make)
+                            print(san_moves)
+                            turn = 2
+                        begin = '00'
+                        dest = '00'
+                        move_list = []
+
+        elif turn == 2:
+            move_to_make= AI.make_move(board,san_moves)
+            new_move = chess.Move.from_uci(move_to_make)
+            san_moves.append(board.san(new_move))
+            board.push_uci(move_to_make)
+            turn = 1
+
         else:
             if event.type == pygame.MOUSEBUTTONDOWN:
                 board.reset()
+                san_moves=[]
                 turn = 1
         if board.is_checkmate() or board.is_stalemate():
             turn = 3
