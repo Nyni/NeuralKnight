@@ -60,6 +60,11 @@ def distribute_moves(vals):
     probs = probs / probs.sum()
     return probs
 
+def load_chesscnn(model_path):
+    model = ChessCNN()
+    model.load_state_dict(torch.load(model_path))
+    return model
+
 @torch.no_grad
 def make_move(ai: ChessCNN, board: Board):
     np_board = torch.from_numpy(board_2_np_repr(board))
