@@ -60,6 +60,7 @@ def distribute_moves(vals):
     probs = probs / probs.sum()
     return probs
 
+@torch.no_grad
 def make_move(ai: ChessCNN, board: Board):
     np_board = torch.from_numpy(board_2_np_repr(board))
     if board.turn == BLACK:
