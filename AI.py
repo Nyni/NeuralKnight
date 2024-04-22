@@ -1,5 +1,3 @@
-# The AI were built while following the tutorial "How to Build a 2000 ELO Chess AI with Deep Learning" by Moran Reznik at https://www.youtube.com/watch?v=aOwvRvTPQrs
-
 from chess import Board, BLACK
 import torch
 from torch import nn
@@ -34,6 +32,7 @@ class ChessModule(nn.Module):
         return input
 
 class ChessCNN(nn.Module):
+    # The AI were built while following the tutorial "How to Build a 2000 ELO Chess AI with Deep Learning" by Moran Reznik at https://www.youtube.com/watch?v=aOwvRvTPQrs
     def __init__(self, hidden_layers = 64, hidden_size = 200) -> None:
         super(ChessCNN, self).__init__()
         self.hidden_layers = hidden_layers
