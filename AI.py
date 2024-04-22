@@ -66,7 +66,7 @@ def load_chesscnn(model_path):
     return model
 
 @torch.no_grad
-def make_move(ai: ChessCNN, board: Board):
+def make_move_with(ai: ChessCNN, board: Board):
     np_board = torch.from_numpy(board_2_np_repr(board))
     if board.turn == BLACK:
         np_board *= -1
