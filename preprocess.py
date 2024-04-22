@@ -9,6 +9,19 @@ letter_2_num = {'a': 0, 'b': 1, 'c': 2, 'd': 3, 'e': 4,
 num_2_letter = {0: 'a', 1: 'b', 2: 'c', 3: 'd', 4: 'e', 
                 5: 'f', 6: 'g', 7: 'h'}
 
+def extract_pgn_movement(pgn_path):
+    with open(pgn_path, 'r') as pgn:
+        with open('pgn_movements.txt', 'a') as of:
+            while True:
+                game = chess.pgn.read_game(pgn)
+                if game is None:
+                    break
+
+                string = str(game.mainline_moves())
+                result = game.headers.get("Result", None)
+                if ('{' not in string) and result is not None:
+                    of.writelines([string, ' ', result,'\n'])
+
 def filter_elo(pgn, elo, max_match = 5000):
     elos_offset = []
     match_num = 0
@@ -96,3 +109,5 @@ class ChessDataset(Dataset):
             input *= -1 # so the cnn know which move belong to which side
 
         return input, output
+
+extract_pgn_movement('libchess_db.pgn')
