@@ -9,6 +9,7 @@ from preprocess import board_2_np_repr, letter_2_num
 import random
 
 CNN_PATH = "models/ChessCNN_E3_L_2.68030E-03.pt"
+
 def make_move_random(board):
     valid_moves =[ move.uci() for move in list(board.legal_moves)]
     return random.choice(valid_moves)
