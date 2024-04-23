@@ -200,10 +200,14 @@ while playing:
                         move_list = []
 
         elif turn == 2:
+
+
             move_to_make= AI.make_move(board,san_moves)
-            new_move = chess.Move.from_uci(move_to_make)
-            san_moves.append(board.san(new_move))
-            board.push_uci(move_to_make)
+            san_moves.append(board.san(move_to_make))
+            board.push(move_to_make)
+            #new_move = chess.Move.from_uci(move_to_make)
+            #san_moves.append(board.san(new_move))
+            #board.push_uci(move_to_make)
             turn = 1
 
         else:

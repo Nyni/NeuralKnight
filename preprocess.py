@@ -110,4 +110,4 @@ class ChessDataset(Dataset):
 
         return input, output
 
-extract_pgn_movement('libchess_db.pgn')
+#extract_pgn_movement('libchess_db.pgn')

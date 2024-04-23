@@ -5,7 +5,10 @@ import torch.nn.functional as F
 import numpy as np
 from preprocess import board_2_np_repr, letter_2_num
 
+
 import random
+
+CNN_PATH = "models/ChessCNN_E3_L_2.68030E-03.pt"
 def make_move_random(board):
     valid_moves =[ move.uci() for move in list(board.legal_moves)]
     return random.choice(valid_moves)
@@ -61,7 +64,8 @@ def distribute_moves(vals):
 
 def load_chesscnn(model_path):
     model = ChessCNN()
-    model.load_state_dict(torch.load(model_path))
+    model.load_state_dict(torch.load(model_path, map_location=torch.device('cpu')))
+    #model.load_state_dict(torch.load(model_path))
     return model
 
 @torch.no_grad
@@ -114,11 +118,12 @@ def make_move(board,san_list):
     san_string = create_san_string(san_list)
     print(san_string)
     valid_moves =[ move.uci() for move in list(board.legal_moves)]
+
     #for move in board.move_stack:
     #    #print(move)
      #  ;print(uci_to_san(board,move))
-
-    return random.choice(valid_moves)
+    return make_move_with(load_chesscnn(CNN_PATH),board)
+    #return random.choice(valid_moves)
 
 
     #with open("in_progress_game.pgn", "w") as pgn_file:
