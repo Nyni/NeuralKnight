@@ -3,7 +3,7 @@ import AI
 from torch.utils.data import DataLoader
 from torch import nn
 import torch
-torch.set_default_device('cuda' if torch.cuda.is_available() else 'cpu')
+torch.set_default_device(AI.DEVICE)
 
 MIN_ELO = 2000
 MAX_TRAINING_GAMES = 5000

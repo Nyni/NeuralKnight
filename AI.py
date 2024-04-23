@@ -9,6 +9,7 @@ from preprocess import board_2_np_repr, letter_2_num
 import random
 
 CNN_PATH = "models/ChessCNN_E3_L_2.68030E-03.pt"
+DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 def make_move_random(board):
     valid_moves =[ move.uci() for move in list(board.legal_moves)]
@@ -65,7 +66,7 @@ def distribute_moves(vals):
 
 def load_chesscnn(model_path):
     model = ChessCNN()
-    model.load_state_dict(torch.load(model_path, map_location=torch.device('cpu')))
+    model.load_state_dict(torch.load(model_path, map_location=DEVICE))
     #model.load_state_dict(torch.load(model_path))
     return model
 
