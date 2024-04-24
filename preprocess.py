@@ -33,9 +33,11 @@ def filter_elo(pgn, elo, max_match = 5000):
             break
 
         if (int(headers.get("WhiteElo", 0)) > elo) and (int(headers.get("BlackElo", 0)) > elo) and (headers.get("Termination", "?") == "Normal"):
+            print("Scanning Matches:", match_num, end="\r")
             match_num += 1
             elos_offset.append(offset)
 
+    print("")
     return elos_offset
 
 
@@ -43,9 +45,12 @@ def parse_pgn(file, min_elo = 2000, matches = 5000) -> list[chess.pgn.Game]:
     games = []
     with open(file) as pgn:
         elos = filter_elo(pgn, min_elo, matches)
-        for offset in elos:
+        for i, offset in enumerate(elos):
             pgn.seek(offset)
-            games.append(chess.pgn.read_game(pgn))
+            game = chess.pgn.read_game(pgn)
+            if game.next() is not None:
+                print("Reading Matches:", i, end="\r")
+                games.append(game)
 
     return games
 
