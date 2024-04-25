@@ -1,6 +1,6 @@
 import chess
 import pygame
-
+from RF import predict_win_probability
 import AI
 
 pygame.init()
@@ -26,6 +26,27 @@ for move in legal_moves:
     print(move.uci())
 
 playing = True
+
+def encode_and_print_board(board):
+    piece_to_number = {
+        'p': 7, 'r': 10, 'n': 8, 'b': 9, 'q': 11, 'k': 12,
+        'P': 1, 'R': 4, 'N': 2, 'B': 3, 'Q': 5, 'K': 6
+    }
+    rows = []
+    for rank in reversed(range(8)):  # Start from '8' down to '1'
+        encoded_row = []
+        for file in range(8):  # Start from 'a' to 'h'
+            square_index = chess.square(file, rank)
+            piece = board.piece_at(square_index)
+            number = piece_to_number.get(piece.symbol(), 0) if piece else 0
+            encoded_row.append(number)
+        rows.append(' '.join(f'{num:2}' for num in encoded_row))
+    for row in rows:
+        print(row)
+    print()  # Add an extra newline for separation between board states
+
+
+
 
 def Load_Pieces():
     pieces = {}
@@ -142,9 +163,17 @@ while playing:
                         move_to_make = str(begin + dest)
                         if move_to_make in moves:
                             board.push_san(move_to_make)
+                            # Update the probability display after each move
+                            current_probability = predict_win_probability(board)
+                            print(f"Probability of White winning: {current_probability:.2%}")
+
                             turn = 2
                         elif str(move_to_make + "q") in moves:
                             board.push_san(move_to_make + "q")
+                            # Update the probability display after each move
+                            current_probability = predict_win_probability(board)
+                            print(f"Probability of White winning: {current_probability:.2%}")
+
                             turn = 2
                         begin = '00'
                         dest = '00'
@@ -153,10 +182,18 @@ while playing:
 
         elif turn == 2:
             board.push_san(AI.make_move(board))
+            #Update the probability display after each move
+            current_probability = predict_win_probability(board)
+            print(f"Probability of White winning: {current_probability:.2%}")
+
             turn = 1
         else:
             if event.type == pygame.MOUSEBUTTONDOWN:
                 board.reset()
+                #Update the probability display after each move
+                current_probability = predict_win_probability(board)
+                print(f"Probability of White winning: {current_probability:.2%}")
+
                 turn = 1
         if board.is_checkmate() or board.is_stalemate():
             turn = 3
