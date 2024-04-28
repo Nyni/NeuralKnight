@@ -31,11 +31,14 @@ def filter_elo(pgn, elo, max_match = 5000):
 
         if match_num > max_match or headers is None:
             break
+        whiteELO = headers.get("WhiteElo",0)
+        blackElo = headers.get("BlackElo",0)
+        if whiteELO.isdigit() and blackElo.isdigit():
 
-        if (int(headers.get("WhiteElo", 0)) > elo) and (int(headers.get("BlackElo", 0)) > elo) and (headers.get("Termination", "?") == "Normal"):
-            print("Scanning Matches:", match_num, end="\r")
-            match_num += 1
-            elos_offset.append(offset)
+            if (int(headers.get("WhiteElo", 0)) > elo) and (int(headers.get("BlackElo", 0)) > elo) and (headers.get("Termination", "?") == "Normal"):
+                print("Scanning Matches:", match_num, end="\r")
+                match_num += 1
+                elos_offset.append(offset)
 
     print("")
     return elos_offset

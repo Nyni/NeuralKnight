@@ -81,4 +81,4 @@ def train_epoch(num = 1):
             best_vloss = avg_vloss
             torch.save(model.state_dict(), f"ChessCNN_E{epoch}_L_{best_vloss:.5E}.pt")
 
-train_epoch(10)
+train_epoch(15)

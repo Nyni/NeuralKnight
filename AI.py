@@ -8,7 +8,7 @@ from preprocess import board_2_np_repr, letter_2_num
 
 import random
 
-CNN_PATH = "models/ChessCNN_E3_L_2.68030E-03.pt"
+CNN_PATH = "Models/ChessCNN_E31_Model_4.pt"
 DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 def make_move_random(board):
