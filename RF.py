@@ -6,8 +6,6 @@ from sklearn.metrics import accuracy_score, classification_report
 from sklearn.preprocessing import MinMaxScaler
 import pickle
 
-
-
 def parse_chess_data(file_path):
     def calculate_piece_values(board_state):
         piece_values = {
@@ -16,51 +14,68 @@ def parse_chess_data(file_path):
         }
         white_value, black_value = 0, 0
         for piece in board_state:
-            if piece <= 6 and piece > 0:  # White pieces
+            if 1 <= piece <= 6:  # White pieces
                 white_value += piece_values[piece]
-            elif piece > 6:  # Black pieces
+            elif 7 <= piece <= 12:  # Black pieces
                 black_value += piece_values[piece]
-        material_diff = white_value - black_value  # Calculate differential material value
+        material_diff = white_value - black_value
         return white_value, black_value, material_diff
 
     with open(file_path, 'r') as file:
         lines = file.read().strip().split('\n')
 
-    data = []  # to store all moves and their  result
-    current_game_moves = []  # temporarily store moves for the current game
+    data = []
+    current_game_moves = []
+    i = 0
 
-    i = 0  # Initialize a counter for lines
     while i < len(lines):
         if lines[i].startswith('Result'):
-            result = float(lines[i].split()[-1])
-            for move in current_game_moves:
-                white_value, black_value, material_diff = calculate_piece_values(move[:64])
-                move.extend([result, white_value, black_value, material_diff])
-            data.extend(current_game_moves)
+            try:
+                result = float(lines[i].split()[-1])
+                valid_game = True
+            except ValueError:
+                print(f"Invalid result format at line {i}, skipping game.")
+                valid_game = False
+
+            if valid_game and all(len(move) == 64 for move in current_game_moves):
+                for move in current_game_moves:
+                    white_value, black_value, material_diff = calculate_piece_values(move)
+                    move.extend([result, white_value, black_value, material_diff])
+                data.extend(current_game_moves)
+            else:
+                print(f"Skipping game due to invalid data before line {i}.")
             current_game_moves = []
-            i += 1
+            i += 1  # Move to the next line after result
         else:
-            if i + 8 > len(lines) or "Result" in lines[i+7]:
-                print(f"Warning: Incomplete board state starting at line {i}.")
-                break
             move = []
-            for _ in range(8):
-                if lines[i].startswith('Result'):
-                    print(f"Error processing line {i}: {lines[i]}")
+            try:
+                for _ in range(8):
+                    row_data = list(map(int, lines[i].strip().split()))
+                    if len(row_data) != 8:
+                        raise ValueError("Incorrect number of integers in row")
+                    move.extend(row_data)
                     i += 1
-                    break
-                move.extend(list(map(int, lines[i].strip().split())))
-                i += 1
+            except (ValueError, IndexError):
+                print(f"Invalid or incomplete data starting at line {i}, skipping to next game.")
+                current_game_moves = []
+                i = skip_to_next_result(lines, i)  # Skip to next 'Result' line
+                continue
+
             if len(move) == 64:
                 current_game_moves.append(move)
 
-    # Include the differential material value in the column names
     columns = [f'position{i+1}' for i in range(64)] + ['Result', 'White_Material', 'Black_Material', 'Material_Diff']
     df = pd.DataFrame(data, columns=columns)
     return df
 
+def skip_to_next_result(lines, current_index):
+    """Moves the index to the next 'Result' line or to the end of the list."""
+    while current_index < len(lines) and not lines[current_index].startswith('Result'):
+        current_index += 1
+    return current_index
+
 #testing validity of feature structure
-df = parse_chess_data('chess_results.txt')
+df = parse_chess_data('newChess_results.txt')
 print(df.head(90))
 
 # drop dataframe down to material features
