@@ -1,8 +1,13 @@
 import chess
 import chess.pgn
 import pygame
-
+from RF import predict_win_probability
 import AI
+
+
+
+
+
 
 pygame.init()
 
@@ -14,6 +19,37 @@ board = chess.Board()
 san_moves = []
 print(board)
 surface = pygame.display.set_mode((width, height))
+
+
+#Update the probability display after each move
+#current_probability = predict_win_probability(board)
+#print(f"Probability of White winning: {current_probability:.2%}")
+#############################################################
+
+
+#ADDED FUNCTION- encodes board for predict_win_probability function
+def encode_and_print_board(board):
+    piece_to_number = {
+        'p': 7, 'r': 10, 'n': 8, 'b': 9, 'q': 11, 'k': 12,
+        'P': 1, 'R': 4, 'N': 2, 'B': 3, 'Q': 5, 'K': 6
+    }
+    rows = []
+    for rank in reversed(range(8)):  # Start from '8' down to '1'
+        encoded_row = []
+        for file in range(8):  # Start from 'a' to 'h'
+            square_index = chess.square(file, rank)
+            piece = board.piece_at(square_index)
+            number = piece_to_number.get(piece.symbol(), 0) if piece else 0
+            encoded_row.append(number)
+        rows.append(' '.join(f'{num:2}' for num in encoded_row))
+    for row in rows:
+        print(row)
+    print()  # Add an extra newline for separation between board states
+
+
+
+
+
 
 """
 board.push_san("d4")
