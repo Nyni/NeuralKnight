@@ -117,8 +117,8 @@ def uci_to_san(board,uci_move):
     return board.san(move)
 #
 def make_move(board,san_list):
-    san_string = create_san_string(san_list)
-    print(san_string)
+    #san_string = create_san_string(san_list)
+    #print(san_string)
     valid_moves =[ move.uci() for move in list(board.legal_moves)]
 
     #for move in board.move_stack:

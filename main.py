@@ -12,12 +12,13 @@ import AI
 pygame.init()
 
 width = 480  # Width of the window
-height = 540  # Height of the Window matches the width + an extra row for score
+height = 600  # Height of the Window matches the width + an extra row for score
 boxSize = width // 8 # 1/8 of the window widtch.
 game = chess.pgn.Game()
 board = chess.Board()
 san_moves = []
-print(board)
+current_probability = predict_win_probability(board)
+#print(board)
 surface = pygame.display.set_mode((width, height))
 
 
@@ -48,20 +49,6 @@ def encode_and_print_board(board):
 
 
 
-
-
-
-"""
-board.push_san("d4")
-board.push_san("e5")
-board.push_san("d4e5")
-print(board)
-"""
-
-legal_moves = list(board.legal_moves)
-for move in legal_moves:
-    print(move.uci())
-
 playing = True
 
 def Load_Pieces():
@@ -82,14 +69,14 @@ def Load_Pieces():
 
     return pieces
 
-def Draw(move_list,begin_square,board):
+def Draw(move_list,begin_square,board,prob):
     surface.fill((0,0,0))
 
     Draw_Board()
     Draw_Current_Selection(begin_square)
     Draw_Legal_Moves(move_list)
     DrawPieces()
-    Draw_Status(board)
+    Draw_Status(board,prob)
 def Draw_Board():
     colors = [(210,180,140), (100, 50, 35)]
     for row in range(8):
@@ -97,7 +84,7 @@ def Draw_Board():
             color = colors[(row + col) % 2]
             pygame.draw.rect(surface, color, (col * boxSize, row * boxSize, boxSize, boxSize))
 
-def Draw_Status(board):
+def Draw_Status(board,curr_prob):
 
     text = ""
     myfont = pygame.font.SysFont("monospace", 34,bold=True)
@@ -117,8 +104,14 @@ def Draw_Status(board):
         if board.is_check():
             text += " Check!"
 
+    rounded_prob = round(curr_prob, 4)
+    text2 = "White to win: {:.4%}".format(rounded_prob)
     label = myfont.render(text, 1, (255, 255, 0))
     surface.blit(label, label.get_rect(center=(width / 2, 510)))
+    if not board.is_checkmate() and not board.is_stalemate():
+        label2 = myfont.render(text2, 1, (255, 255, 0))
+        surface.blit(label2, label2.get_rect(center=(width / 2, 560)))
+
 def Draw_Current_Selection(begin_square):
     if begin_square != '00':
         x = chess.square_file(chess.parse_square(begin_square)) * boxSize
@@ -159,45 +152,7 @@ while playing:
         if event.type == pygame.QUIT:
             playing = False
         if turn==1:
-            """
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                #check position of the mouse
-                x, y = event.pos
-                x = x//boxSize
-                y = y//boxSize
-                # if the mouse is in the scorebox, do nothing
-                if y == 8:
-                    pass
-                else:
-                    if begin=='00':
-                        begin =str(colNames[x]+str(rowNames[y]))
-                        print(begin)
-                        move_list = [move.uci() for move in list(board.legal_moves) if move.from_square == chess.parse_square(begin)]
-                        print([move for move in move_list])
-                    else:
-                        dest = str(colNames[x] + str(rowNames[y]))
-                        moves = [move.uci() for move in list(board.legal_moves)]
-                        move_to_make = str(begin + dest)
-                        if move_to_make in moves:
-                            board.push_san(move_to_make)
-                            turn = 2
-                        elif str(move_to_make + "q") in moves:
-                            board.push_san(move_to_make + "q")
-                            turn = 2
-                        begin = '00'
-                        dest = '00'
-                        move_list=[]
 
-
-
-        elif turn == 2:
-
-            #game.add_variation(str(board))
-            #board_pgn = board.epd()
-
-            board.push_san(AI.make_move(board))
-            turn = 1
-            """
             if event.type == pygame.MOUSEBUTTONDOWN:
                 # Check position of the mouse
                 x, y = event.pos
@@ -209,10 +164,10 @@ while playing:
                 else:
                     if begin == '00':
                         begin = str(colNames[x] + str(rowNames[y]))
-                        print(begin)
+                        #print(begin)
                         move_list = [move.uci() for move in list(board.legal_moves) if
                                      move.from_square == chess.parse_square(begin)]
-                        print([move for move in move_list])
+                        #print([move for move in move_list])
                     else:
                         dest = str(colNames[x] + str(rowNames[y]))
                         move_to_make = str(begin + dest)
@@ -220,7 +175,9 @@ while playing:
                             new_move = chess.Move.from_uci(move_to_make)
                             san_moves.append(board.san(new_move))
                             board.push_uci(move_to_make)
-                            print(san_moves)
+                            current_probability = predict_win_probability(board)
+
+                            #print(san_moves)
                             turn = 2
                         elif move_to_make + "q" in [move.uci() for move in list(board.legal_moves)]:
                             move_to_make = move_to_make + "q"
@@ -229,7 +186,9 @@ while playing:
                             san_moves.append(board.san(new_move))
 
                             board.push_uci(move_to_make)
-                            print(san_moves)
+                            current_probability = predict_win_probability(board)
+
+                            #print(san_moves)
                             turn = 2
                         begin = '00'
                         dest = '00'
@@ -245,17 +204,20 @@ while playing:
             #san_moves.append(board.san(new_move))
             #board.push_uci(move_to_make)
             turn = 1
+            current_probability = predict_win_probability(board)
+
 
         else:
             if event.type == pygame.MOUSEBUTTONDOWN:
                 board.reset()
                 san_moves=[]
                 turn = 1
+                current_probability = predict_win_probability(board)
         if board.is_checkmate() or board.is_stalemate():
             turn = 3
 
 
 
 
-    Draw(move_list,begin,board)
+    Draw(move_list,begin,board,current_probability)
     pygame.display.flip()
